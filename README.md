@@ -1,24 +1,78 @@
 # Comandos paso a paso para ejecutar
+cp .env.example .env
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 
+## Base de datos PostgreSQL y Docker
+
+La API usa **PostgreSQL** por defecto con el driver `psycopg` 3:
+
+```
+DATABASE_URL=postgresql+psycopg://labtracker:labtracker@localhost:5432/labtracker
+```
+
+Levantar PostgreSQL y la API juntos:
+
+```bash
+cp .env.example .env      # ajusta credenciales si lo deseas
+docker compose up --build
+```
+
+- `db`: `postgres:16-alpine`, con volumen persistente `pgdata` y healthcheck
+  `pg_isready`. Expone el puerto `${POSTGRES_PORT:-5432}`.
+- `api`: construida con el `Dockerfile` (multi-stage, usuario no root),
+  espera a que `db` esté sano y se conecta usando el hostname `db`.
+  Expone `http://localhost:8000` (`/docs`, `/openapi.json`).
+
+Al iniciar, `create_all()` crea el esquema en PostgreSQL. Los cambios de
+estructura posteriores se gestionan con Alembic; la migración ligera de
+columnas solo se aplica cuando se usa SQLite para desarrollo.
+
+Para ejecutar solo la base de datos y correr la API localmente:
+
+```bash
+docker compose up -d db
+uvicorn main:app --reload
+```
+
 ## Módulo de alumnos, tipos de equipo, matrículas y licencias
 
 ### Arquitectura
 
-- `app/models`: **un archivo por modelo** (`alumno.py`, `equipo.py`, `licencia.py`, …). Los enums están agrupados en `app/models/enums.py` y las utilidades compartidas en `app/models/comun.py`. `app/models/__init__.py` reexporta todo. Cada entidad relevante expone `validar()`, ejecutada por el repositorio antes de insertar/actualizar.
-- `app/core/pagination.py`: `ParametrosPaginacion`, `Pagina[T]` y la dependencia `get_paginacion`. El **repositorio** aplica `offset/limit` y calcula `total` y `total_paginas`.
-- `app/core/api_response.py`: `ApiResponse[T]` con `isSuccess`, `status`, `message`, `details`, `errors`, `timestamp`, `traceId` y `path`. Cualquier tipo (DTO, página o lista) puede ir en `details`.
-- `app/core/exceptions.py`: excepciones propias (`NotFoundException`, `ConflictException`, `FileValidationException`, `DatabaseException`, …). Los servicios lanzan estas, nunca `HTTPException`.
-- `app/core/exception_handlers.py`: traduce cualquier excepción (de negocio, de validación, HTTP o no controlada) a `ApiResponse`.
-- `app/dtos`: DTOs de Pydantic usados **exclusivamente por los servicios** (entrada y salida). Validan forma, rangos y formatos con `field_validator` / `model_validator`.
-- `app/schemas`: contratos HTTP de la API. Los routers convierten el schema al DTO correspondiente (`CrearAlumnoDTO.model_validate(data)`, etc.).
-- `app/repositories/interfaces` y `app/repositories/implementaciones`: un archivo por contrato y por implementación, respectivamente.
-- `app/services/interfaces` y `app/services/implementaciones`: idem para la capa de servicio.
+```
+app/
+├── domain/
+│   ├── entities/       # alumno.py, equipo.py, laboratorio.py, licencia.py, ... + enums.py, comun.py
+│   ├── repositories/   # alumno_repository.py, equipo_repository.py, ... (contratos)
+│   └── exceptions/     # exceptions.py (NotFoundException, ConflictException, ...)
+├── application/
+│   ├── dtos/           # alumno_dto.py, equipo_dto.py, laboratorio_dto.py, licencia_dto.py, ...
+│   ├── services/       # alumno_service_impl.py, ... y cargar_matriculas_use_case.py
+│   └── interfaces/     # alumno_service.py, equipo_service.py, ... (contratos)
+├── infrastructure/
+│   ├── database/       # config.py, database.py (engine, sesión, create_all + migración)
+│   └── repositories/   # alumno_repository_impl.py, equipo_repository_impl.py, ...
+├── api/
+│   ├── endpoints/      # alumno_endpoints.py, equipo_endpoints.py, ... (routers)
+│   ├── http/           # alumno.http, equipo.http, ... (peticiones listas para probar)
+│   ├── api_response.py
+│   ├── exception_handlers.py
+│   └── pagination.py
+└── main.py
+```
 
-La lógica de negocio vive en el servicio; ni los routers ni los DTOs consultan la BD.
+Solo cuatro carpetas de alto nivel: `domain`, `application`, `infrastructure` y `api`.
+
+- **No existe `app/schemas` ni `app/models` ni `app/dtos` sueltos**: los DTOs viven en `application/dtos` y son el contrato HTTP y de servicio, con validación Pydantic (`field_validator` en modo `before` para normalizar códigos y `model_validator` para reglas compuestas).
+- `domain/entities` agrupa **todas las tablas SQLModel**, los enums y las utilidades; cada entidad expone `validar()`, ejecutada por el repositorio antes de insertar/actualizar.
+- Los contratos de repositorio y servicio usan sufijo simple (`alumno_repository`, `alumno_service`); sus implementaciones usan `_impl` (`alumno_repository_impl`, `alumno_service_impl`).
+- `api/pagination.py`: `ParametrosPaginacion`, `Pagina[T]` y `get_paginacion`. El repositorio aplica `offset/limit` y calcula totales.
+- `api/api_response.py`: `ApiResponse[T]` con `isSuccess`, `status`, `message`, `details`, `errors`, `timestamp`, `traceId` y `path`.
+- `api/exception_handlers.py`: traduce cualquier excepción (de negocio, validación, HTTP o no controlada) a `ApiResponse`. Los servicios lanzan excepciones de `domain/exceptions`, nunca `HTTPException`.
+
+La lógica de negocio vive en el servicio; los endpoints solo traducen HTTP ↔ DTO y devuelven `ApiResponse`.
 
 ### Formato de respuesta y paginación
 
@@ -64,6 +118,15 @@ El campo `tipo_equipo_id` de `/equipos` vincula el equipo físico con el catálo
 - La antigua enumeración de equipos specific (`cpu`, `monitor`, …) se reemplazó por `CategoriaTipoEquipo`, una lista **genérica de etiquetas**: `hardware`, `software`, `redes`, `periferico`, `almacenamiento`, `seguridad`, `mobiliario`, `otro`. El tipo concreto (CPU Docente, Monitor 24", etc.) se describe en `tipos_equipo.nombre`.
 - `Equipo` registra `costo_estimado`, `costo_adquisicion`, `moneda`, `fecha_adquisicion`, `proveedor` y `garantia_hasta`. `TipoEquipo` registra `costo_referencial`, `moneda` y `requiere_licencia`.
 - `Licencia` permite `tipo` (perpetua, suscripción, OEM, académica, prueba), `clave_producto`, `fabricante`, `cantidad_usuarios`, `fecha_vencimiento`, `costo`, `moneda`, `estado` y su vínculo con `equipo_id` y/o `tipo_equipo_id`. El servicio valida que el equipo y el tipo existan, que la categoría sea coherente y que una licencia vencida no quede activa.
+
+### Imágenes y adjuntos
+
+- `laboratorios.url_imagen` y `equipos.url_imagen`: enlace HTTP/HTTPS a la foto del laboratorio o equipo (máx. 500 caracteres). Se valida en el DTO y se devuelve en las respuestas.
+- `incidentes.url_imagenes`: arreglo de enlaces a fotos del fallo y de la reparación. Se acepta al reportar el incidente y al actualizar su estado (se acumulan sin repetir).
+
+### Pruebas con archivos `.http`
+
+En `app/api/http/` hay un archivo por controlador (`alumno.http`, `equipo.http`, `laboratorio.http`, `licencia.http`, `matricula.http`, `tipo_equipo.http`, `horario.http`, `incidente.http`, `workstation.http`). Ábrelos con la extensión REST Client de VS Code o JetBrains; cada uno define `@baseUrl`, IDs de ejemplo y una petición por endpoint con datos válidos. El de matrículas incluye el multipart para subir `matriculados.xlsx` y el comando para generarlo.
 
 ### Carga masiva
 

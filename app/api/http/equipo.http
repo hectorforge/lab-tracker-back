@@ -1,0 +1,55 @@
+@baseUrl = http://127.0.0.1:8000
+@labId = 1
+@wsId = 1
+@tipoId = 1
+@equipoId = 1
+
+### Registrar equipo (con costos y URL de imagen)
+POST {{baseUrl}}/equipos/
+Content-Type: application/json
+
+{
+  "codigo_patrimonial": "pat-001",
+  "categoria": "hardware",
+  "marca": "HP",
+  "modelo": "ProDesk 400 G7",
+  "numero_serie": "SN-123456",
+  "caracteristicas": "Intel Core i5, 16 GB RAM, 512 GB SSD",
+  "estado": "operativo",
+  "laboratorio_id": {{labId}},
+  "workstation_id": {{wsId}},
+  "tipo_equipo_id": {{tipoId}},
+  "costo_estimado": 2500,
+  "costo_adquisicion": 2300,
+  "moneda": "pen",
+  "fecha_adquisicion": "2026-01-15",
+  "proveedor": "Proveedor S.A.C.",
+  "garantia_hasta": "2028-01-15",
+  "observaciones": "Equipo asignado al turno de redes",
+  "url_imagen": "https://images.example.edu/equipos/pat-001.jpg"
+}
+
+### Listar equipos (paginado)
+GET {{baseUrl}}/equipos/?pagina=1&tamano_pagina=10
+
+### Listar equipos por laboratorio y categoría
+GET {{baseUrl}}/equipos/laboratorio/{{labId}}?categoria=hardware&pagina=1&tamano_pagina=10
+
+### Listar equipos por workstation
+GET {{baseUrl}}/equipos/workstation/{{wsId}}?pagina=1&tamano_pagina=10
+
+### Obtener equipo
+GET {{baseUrl}}/equipos/{{equipoId}}
+
+### Actualizar equipo (cambiar imagen y costo)
+PUT {{baseUrl}}/equipos/{{equipoId}}
+Content-Type: application/json
+
+{
+  "estado": "en_mantenimiento",
+  "costo_estimado": 2600,
+  "url_imagen": "https://images.example.edu/equipos/pat-001-nueva.jpg"
+}
+
+### Eliminar equipo
+DELETE {{baseUrl}}/equipos/{{equipoId}}

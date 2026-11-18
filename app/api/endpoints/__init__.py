@@ -1,0 +1,9 @@
+from .alumno_endpoints import router as alumno_router
+from .equipo_endpoints import router as equipo_router
+from .horario_endpoints import router as horario_router
+from .incidente_endpoints import router as incidente_router
+from .laboratorio_endpoints import router as laboratorio_router
+from .licencia_endpoints import router as licencia_router
+from .matricula_endpoints import router as matricula_router
+from .tipo_equipo_endpoints import router as tipo_equipo_router
+from .workstation_endpoints import router as workstation_router

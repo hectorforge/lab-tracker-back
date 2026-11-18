@@ -1,0 +1,32 @@
+@baseUrl = http://127.0.0.1:8000
+@labId = 1
+@wsId = 1
+
+### Crear workstation
+POST {{baseUrl}}/workstations/
+Content-Type: application/json
+
+{
+  "codigo": "ws-01",
+  "ubicacion_interna": "Fila 1 - Puesto 1",
+  "estado": "disponible",
+  "laboratorio_id": {{labId}}
+}
+
+### Listar workstations de un laboratorio (paginado)
+GET {{baseUrl}}/workstations/laboratorio/{{labId}}?pagina=1&tamano_pagina=10
+
+### Obtener workstation
+GET {{baseUrl}}/workstations/{{wsId}}
+
+### Actualizar workstation
+PUT {{baseUrl}}/workstations/{{wsId}}
+Content-Type: application/json
+
+{
+  "ubicacion_interna": "Fila 2 - Puesto 3",
+  "estado": "en_mantenimiento"
+}
+
+### Eliminar workstation
+DELETE {{baseUrl}}/workstations/{{wsId}}

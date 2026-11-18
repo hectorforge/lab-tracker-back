@@ -1,0 +1,42 @@
+@baseUrl = http://127.0.0.1:8000
+@alumnoId = 1
+
+### Crear alumno
+POST {{baseUrl}}/alumnos/
+Content-Type: application/json
+
+{
+  "codigo": "20240001",
+  "nombres": "Ana",
+  "apellidos": "Lopez",
+  "tipo_documento": "dni",
+  "numero_documento": "12345678",
+  "correo_institucional": "ana.lopez@universidad.edu.pe",
+  "correo_personal": "ana.lopez@gmail.com",
+  "telefono": "987654321",
+  "fecha_nacimiento": "2003-05-12",
+  "carrera": "Ingenieria de Sistemas",
+  "semestre": 6,
+  "grupo": "A",
+  "estado": "activo",
+  "fecha_ingreso": "2022-03-01"
+}
+
+### Listar alumnos (paginado y filtrado)
+GET {{baseUrl}}/alumnos/?pagina=1&tamano_pagina=10&carrera=Sistemas&estado=activo&busqueda=Ana
+
+### Obtener alumno
+GET {{baseUrl}}/alumnos/{{alumnoId}}
+
+### Actualizar alumno
+PUT {{baseUrl}}/alumnos/{{alumnoId}}
+Content-Type: application/json
+
+{
+  "telefono": "999888777",
+  "semestre": 7,
+  "observaciones": "Matriculado en laboratorio de redes"
+}
+
+### Eliminar alumno
+DELETE {{baseUrl}}/alumnos/{{alumnoId}}

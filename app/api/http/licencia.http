@@ -1,0 +1,44 @@
+@baseUrl = http://127.0.0.1:8000
+@equipoId = 1
+@tipoId = 1
+@licenciaId = 1
+
+### Crear licencia por equipo
+POST {{baseUrl}}/licencias/
+Content-Type: application/json
+
+{
+  "codigo": "lic-win-001",
+  "nombre": "Windows 11 Pro",
+  "tipo": "perpetua",
+  "clave_producto": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX",
+  "fabricante": "Microsoft",
+  "cantidad_usuarios": 1,
+  "fecha_adquisicion": "2026-01-15",
+  "fecha_vencimiento": "2029-01-15",
+  "costo": 950,
+  "moneda": "pen",
+  "estado": "activa",
+  "equipo_id": {{equipoId}},
+  "tipo_equipo_id": {{tipoId}},
+  "observaciones": "Licencia OEM del equipo"
+}
+
+### Listar licencias (paginado y filtrado)
+GET {{baseUrl}}/licencias/?pagina=1&tamano_pagina=10&equipo_id={{equipoId}}&estado=activa
+
+### Obtener licencia
+GET {{baseUrl}}/licencias/{{licenciaId}}
+
+### Actualizar licencia
+PUT {{baseUrl}}/licencias/{{licenciaId}}
+Content-Type: application/json
+
+{
+  "cantidad_usuarios": 2,
+  "estado": "suspendida",
+  "observaciones": "Suspendida temporalmente por mantenimiento"
+}
+
+### Eliminar licencia
+DELETE {{baseUrl}}/licencias/{{licenciaId}}

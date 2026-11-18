@@ -1,0 +1,48 @@
+@baseUrl = http://127.0.0.1:8000
+@labId = 1
+@wsId = 1
+@horarioId = 1
+
+### Crear horario / turno
+POST {{baseUrl}}/horarios/
+Content-Type: application/json
+
+{
+  "laboratorio_id": {{labId}},
+  "nombre_turno": "Turno manana - Redes",
+  "docente_responsable": "Prof. Perez",
+  "fecha": "2026-11-20",
+  "hora_inicio": "08:00:00",
+  "hora_fin": "10:00:00"
+}
+
+### Listar horarios (paginado)
+GET {{baseUrl}}/horarios/?pagina=1&tamano_pagina=10&laboratorio_id={{labId}}&estado=programado
+
+### Obtener horario
+GET {{baseUrl}}/horarios/{{horarioId}}
+
+### Iniciar turno
+PATCH {{baseUrl}}/horarios/{{horarioId}}/iniciar
+
+### Finalizar turno
+PATCH {{baseUrl}}/horarios/{{horarioId}}/finalizar
+
+### Cancelar turno
+PATCH {{baseUrl}}/horarios/{{horarioId}}/cancelar
+
+### Asignar workstation a un alumno responsable
+POST {{baseUrl}}/horarios/{{horarioId}}/asignaciones
+Content-Type: application/json
+
+{
+  "workstation_id": {{wsId}},
+  "codigo_alumno": "20240001",
+  "observaciones": "Responsable del puesto"
+}
+
+### Listar asignaciones del turno (paginado)
+GET {{baseUrl}}/horarios/{{horarioId}}/asignaciones?pagina=1&tamano_pagina=10
+
+### Historial de asignaciones de un alumno (paginado)
+GET {{baseUrl}}/horarios/alumnos/20240001/historial?pagina=1&tamano_pagina=10

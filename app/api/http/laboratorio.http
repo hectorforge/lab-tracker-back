@@ -1,0 +1,34 @@
+@baseUrl = http://127.0.0.1:8000
+@labId = 1
+
+### Crear laboratorio
+POST {{baseUrl}}/laboratorios/
+Content-Type: application/json
+
+{
+  "codigo": "lab-red-01",
+  "nombre": "Laboratorio de Redes",
+  "ubicacion": "Piso 2 - Bloque B",
+  "capacidad_workstations": 30,
+  "estado": "disponible",
+  "url_imagen": "https://images.example.edu/lab-redes.jpg"
+}
+
+### Listar laboratorios (paginado)
+GET {{baseUrl}}/laboratorios/?pagina=1&tamano_pagina=10&solo_disponibles=true
+
+### Obtener laboratorio
+GET {{baseUrl}}/laboratorios/{{labId}}
+
+### Actualizar laboratorio
+PUT {{baseUrl}}/laboratorios/{{labId}}
+Content-Type: application/json
+
+{
+  "nombre": "Laboratorio de Redes y Telecomunicaciones",
+  "capacidad_workstations": 32,
+  "url_imagen": "https://images.example.edu/lab-redes-nuevo.jpg"
+}
+
+### Eliminar laboratorio
+DELETE {{baseUrl}}/laboratorios/{{labId}}

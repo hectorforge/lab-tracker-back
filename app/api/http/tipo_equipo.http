@@ -1,0 +1,39 @@
+@baseUrl = http://127.0.0.1:8000
+@tipoId = 1
+
+### Crear tipo de equipo (categoría genérica)
+POST {{baseUrl}}/tipos-equipo/
+Content-Type: application/json
+
+{
+  "codigo": "cpu-docente",
+  "nombre": "CPU Docente",
+  "descripcion": "Computadora de escritorio para laboratorios tecnologicos",
+  "categoria": "hardware",
+  "especificaciones_minimas": "Intel Core i5, 16 GB RAM, 512 GB SSD",
+  "vida_util_meses": 60,
+  "requiere_mantenimiento": true,
+  "requiere_licencia": true,
+  "costo_referencial": 2500,
+  "moneda": "pen",
+  "estado": "activo"
+}
+
+### Listar tipos de equipo (paginado y filtrado)
+GET {{baseUrl}}/tipos-equipo/?pagina=1&tamano_pagina=10&solo_activos=true&categoria=hardware
+
+### Obtener tipo de equipo
+GET {{baseUrl}}/tipos-equipo/{{tipoId}}
+
+### Actualizar tipo de equipo
+PUT {{baseUrl}}/tipos-equipo/{{tipoId}}
+Content-Type: application/json
+
+{
+  "nombre": "CPU Docente (actualizada)",
+  "costo_referencial": 2700,
+  "requiere_licencia": false
+}
+
+### Eliminar tipo de equipo
+DELETE {{baseUrl}}/tipos-equipo/{{tipoId}}

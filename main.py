@@ -1,20 +1,21 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from app.core.config import settings
-from app.core.database import create_db_and_tables
-from app.core.exception_handlers import registrar_manejadores_excepciones
-import app.models  # noqa: F401
-from app.routers import (
-    laboratorio_router,
-    workstation_router,
-    equipo_router,
-    tipo_equipo_router,
+
+from app.api import registrar_manejadores_excepciones
+from app.api.endpoints import (
     alumno_router,
-    matricula_router,
-    licencia_router,
+    equipo_router,
     horario_router,
     incidente_router,
+    laboratorio_router,
+    licencia_router,
+    matricula_router,
+    tipo_equipo_router,
+    workstation_router,
 )
+from app.infrastructure.database import create_db_and_tables, settings
+import app.domain.entities  # noqa: F401
 
 
 @asynccontextmanager
@@ -32,15 +33,18 @@ app = FastAPI(
 
 registrar_manejadores_excepciones(app)
 
-app.include_router(laboratorio_router.router)
-app.include_router(workstation_router.router)
-app.include_router(equipo_router.router)
-app.include_router(tipo_equipo_router.router)
-app.include_router(alumno_router.router)
-app.include_router(matricula_router.router)
-app.include_router(licencia_router.router)
-app.include_router(horario_router.router)
-app.include_router(incidente_router.router)
+for router in (
+    laboratorio_router,
+    workstation_router,
+    equipo_router,
+    tipo_equipo_router,
+    alumno_router,
+    matricula_router,
+    licencia_router,
+    horario_router,
+    incidente_router,
+):
+    app.include_router(router)
 
 
 @app.get("/", tags=["Inicio"])

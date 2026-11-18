@@ -1,0 +1,40 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Testing y cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Calidad de código
+.mypy_cache/
+.ruff_cache/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Variables de entorno
+.env
+.env.*
+!.env.example
+
+# Docker
+Dockerfile*
+compose*.yaml
+docker-compose*.yml
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db

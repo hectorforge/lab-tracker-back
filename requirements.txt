@@ -1,7 +1,24 @@
+# ==========================================
+# API
+# ==========================================
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
-sqlmodel>=0.0.35 #ORM clases - SQL
+
+# ==========================================
+# ORM Y BASE DE DATOS
+# ==========================================
+sqlmodel>=0.0.35
+psycopg[binary]>=3.1.0
+alembic>=1.14.0
+
+# ==========================================
+# CONFIGURACIÓN Y VALIDACIÓN
+# ==========================================
 pydantic-settings>=2.6.0
 python-dotenv>=1.0.1
-openpyxl>=3.1.5 # Lectura de archivos Excel (.xlsx) para carga masiva
-python-multipart>=0.0.20 # Soporte de formularios multipart (UploadFile)
+
+# ==========================================
+# ARCHIVOS Y FORMULARIOS
+# ==========================================
+openpyxl>=3.1.5
+python-multipart>=0.0.20

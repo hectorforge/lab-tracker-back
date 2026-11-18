@@ -1,0 +1,40 @@
+@baseUrl = http://127.0.0.1:8000
+@equipoId = 1
+@wsId = 1
+@incidenteId = 1
+
+### Reportar incidente (con enlaces de fotos como adjunto)
+POST {{baseUrl}}/incidentes/
+Content-Type: application/json
+
+{
+  "equipo_id": {{equipoId}},
+  "workstation_id": {{wsId}},
+  "reportado_por": "Prof. Perez",
+  "descripcion": "La workstation no enciende despues de la practica",
+  "prioridad": "alta",
+  "url_imagenes": [
+    "https://images.example.edu/incidentes/inc-001-falla-1.jpg",
+    "https://images.example.edu/incidentes/inc-001-falla-2.jpg"
+  ]
+}
+
+### Listar incidentes (paginado)
+GET {{baseUrl}}/incidentes/?pagina=1&tamano_pagina=10&solo_pendientes=true
+
+### Listar incidentes por equipo
+GET {{baseUrl}}/incidentes/equipo/{{equipoId}}?pagina=1&tamano_pagina=10
+
+### Listar incidentes por workstation
+GET {{baseUrl}}/incidentes/workstation/{{wsId}}?pagina=1&tamano_pagina=10
+
+### Actualizar estado (adjuntar fotos de la reparacion)
+PATCH {{baseUrl}}/incidentes/{{incidenteId}}/estado
+Content-Type: application/json
+
+{
+  "estado": "resuelto",
+  "url_imagenes": [
+    "https://images.example.edu/incidentes/inc-001-arreglo-1.jpg"
+  ]
+}
