@@ -1,7 +1,11 @@
 from datetime import date, time
-from typing import Optional, List
+from typing import Optional
+
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
-from app.models.lab_models import Horario, EstadoHorario, AsignacionWorkstation
+
+from app.core.pagination import Pagina, ParametrosPaginacion
+from app.models import AsignacionWorkstation, EstadoHorario, Horario
 from app.repositories.base_repository import BaseRepository
 from app.repositories.interfaces import AbstractHorarioRepository
 
@@ -12,7 +16,7 @@ class HorarioRepository(BaseRepository[Horario], AbstractHorarioRepository):
 
     def get_conflictos(
         self, laboratorio_id: int, fecha: date, hora_inicio: time, hora_fin: time
-    ) -> List[Horario]:
+    ) -> list:
         statement = select(Horario).where(
             Horario.laboratorio_id == laboratorio_id,
             Horario.fecha == fecha,
@@ -22,14 +26,22 @@ class HorarioRepository(BaseRepository[Horario], AbstractHorarioRepository):
         )
         return list(self.session.exec(statement).all())
 
-    def get_by_laboratorio_y_fecha(
-        self, laboratorio_id: int, fecha: Optional[date] = None
-    ) -> List[Horario]:
-        statement = select(Horario).where(Horario.laboratorio_id == laboratorio_id)
+    def listar(
+        self,
+        paginacion: ParametrosPaginacion,
+        laboratorio_id: Optional[int] = None,
+        fecha: Optional[date] = None,
+        estado: Optional[EstadoHorario] = None,
+    ) -> Pagina[Horario]:
+        statement = select(Horario)
+        if laboratorio_id is not None:
+            statement = statement.where(Horario.laboratorio_id == laboratorio_id)
         if fecha is not None:
             statement = statement.where(Horario.fecha == fecha)
-        statement = statement.order_by(Horario.fecha.desc(), Horario.hora_inicio.asc())
-        return list(self.session.exec(statement).all())
+        if estado is not None:
+            statement = statement.where(Horario.estado == estado)
+        ordenado = statement.order_by(Horario.fecha.desc(), Horario.hora_inicio.asc())
+        return self.paginar(ordenado, paginacion)
 
     def create_asignacion(
         self, asignacion: AsignacionWorkstation
@@ -57,18 +69,29 @@ class HorarioRepository(BaseRepository[Horario], AbstractHorarioRepository):
         )
         return self.session.exec(statement).first()
 
-    def get_asignaciones_por_horario(
-        self, horario_id: int
-    ) -> List[AsignacionWorkstation]:
-        statement = select(AsignacionWorkstation).where(
-            AsignacionWorkstation.horario_id == horario_id
-        )
-        return list(self.session.exec(statement).all())
+    def listar_asignaciones(
+        self,
+        paginacion: ParametrosPaginacion,
+        horario_id: Optional[int] = None,
+        codigo_alumno: Optional[str] = None,
+    ) -> Pagina[AsignacionWorkstation]:
+        statement = select(AsignacionWorkstation)
+        if horario_id is not None:
+            statement = statement.where(
+                AsignacionWorkstation.horario_id == horario_id
+            )
+        if codigo_alumno is not None:
+            statement = statement.where(
+                AsignacionWorkstation.codigo_alumno == codigo_alumno
+            )
+        return self.paginar(statement, paginacion)
 
-    def get_historial_alumno(self, codigo_alumno: str) -> List[AsignacionWorkstation]:
+    def listar_historial_alumno(
+        self, paginacion: ParametrosPaginacion, codigo_alumno: str
+    ) -> Pagina[AsignacionWorkstation]:
         statement = (
             select(AsignacionWorkstation)
             .where(AsignacionWorkstation.codigo_alumno == codigo_alumno)
             .order_by(AsignacionWorkstation.fecha_asignacion.desc())
         )
-        return list(self.session.exec(statement).all())
+        return self.paginar(statement, paginacion)

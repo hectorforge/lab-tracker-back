@@ -1,14 +1,22 @@
-from typing import List, Optional
+from typing import Optional
+
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
+
+from app.core.api_response import ApiResponse
 from app.core.database import get_session
-from app.models.lab_models import TipoEquipo
-from app.schemas.lab_schemas import EquipoCreate, EquipoUpdate, EquipoRead
-from app.repositories.equipo_repo import EquipoRepository
-from app.repositories.laboratorio_repo import LaboratorioRepository
-from app.repositories.workstation_repo import WorkstationRepository
+from app.core.pagination import Pagina, ParametrosPaginacion, get_paginacion
+from app.dtos import ActualizarEquipoDTO, CrearEquipoDTO
+from app.models import CategoriaTipoEquipo
+from app.repositories.implementaciones import (
+    EquipoRepository,
+    LaboratorioRepository,
+    TipoEquipoRepository,
+    WorkstationRepository,
+)
+from app.schemas.lab_schemas import EquipoCreate, EquipoRead, EquipoUpdate
+from app.services.implementaciones import EquipoService
 from app.services.interfaces import AbstractEquipoService
-from app.services.equipo_service import EquipoService
 
 router = APIRouter(prefix="/equipos", tags=["Inventario de Equipos"])
 
@@ -20,56 +28,84 @@ def get_equipo_service(
         equipo_repo=EquipoRepository(session),
         lab_repo=LaboratorioRepository(session),
         ws_repo=WorkstationRepository(session),
+        tipo_equipo_repo=TipoEquipoRepository(session),
     )
 
 
-@router.post("/", response_model=EquipoRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=ApiResponse[EquipoRead], status_code=status.HTTP_201_CREATED
+)
 def registrar_equipo(
     data: EquipoCreate,
     service: AbstractEquipoService = Depends(get_equipo_service),
 ):
-    return service.registrar_equipo(data)
+    return ApiResponse.ok(
+        service.registrar_equipo(CrearEquipoDTO.model_validate(data)),
+        message="Equipo registrado correctamente.",
+        status=status.HTTP_201_CREATED,
+    )
 
 
-@router.get("/", response_model=List[EquipoRead])
+@router.get("/", response_model=ApiResponse[Pagina[EquipoRead]])
 def listar_equipos(
+    paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractEquipoService = Depends(get_equipo_service),
 ):
-    return service.listar_equipos()
+    return ApiResponse.ok(
+        service.listar_equipos(paginacion),
+        message="Lista de equipos obtenida correctamente.",
+    )
 
 
-@router.get("/laboratorio/{lab_id}", response_model=List[EquipoRead])
+@router.get("/laboratorio/{lab_id}", response_model=ApiResponse[Pagina[EquipoRead]])
 def listar_equipos_por_laboratorio(
     lab_id: int,
-    tipo: Optional[TipoEquipo] = None,
+    paginacion: ParametrosPaginacion = Depends(get_paginacion),
+    categoria: Optional[CategoriaTipoEquipo] = None,
     service: AbstractEquipoService = Depends(get_equipo_service),
 ):
-    return service.listar_por_laboratorio(lab_id, tipo)
+    return ApiResponse.ok(
+        service.listar_por_laboratorio(paginacion, lab_id, categoria),
+        message="Equipos del laboratorio obtenidos correctamente.",
+    )
 
 
-@router.get("/workstation/{workstation_id}", response_model=List[EquipoRead])
+@router.get(
+    "/workstation/{workstation_id}", response_model=ApiResponse[Pagina[EquipoRead]]
+)
 def listar_equipos_por_workstation(
     workstation_id: int,
+    paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractEquipoService = Depends(get_equipo_service),
 ):
-    return service.listar_por_workstation(workstation_id)
+    return ApiResponse.ok(
+        service.listar_por_workstation(paginacion, workstation_id),
+        message="Equipos de la workstation obtenidos correctamente.",
+    )
 
 
-@router.get("/{equipo_id}", response_model=EquipoRead)
+@router.get("/{equipo_id}", response_model=ApiResponse[EquipoRead])
 def obtener_equipo(
     equipo_id: int,
     service: AbstractEquipoService = Depends(get_equipo_service),
 ):
-    return service.obtener_equipo(equipo_id)
+    return ApiResponse.ok(
+        service.obtener_equipo(equipo_id), message="Equipo obtenido correctamente."
+    )
 
 
-@router.put("/{equipo_id}", response_model=EquipoRead)
+@router.put("/{equipo_id}", response_model=ApiResponse[EquipoRead])
 def actualizar_equipo(
     equipo_id: int,
     data: EquipoUpdate,
     service: AbstractEquipoService = Depends(get_equipo_service),
 ):
-    return service.actualizar_equipo(equipo_id, data)
+    return ApiResponse.ok(
+        service.actualizar_equipo(
+            equipo_id, ActualizarEquipoDTO.model_validate(data)
+        ),
+        message="Equipo actualizado correctamente.",
+    )
 
 
 @router.delete("/{equipo_id}", status_code=status.HTTP_204_NO_CONTENT)

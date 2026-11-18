@@ -1,6 +1,6 @@
-from typing import List
-from fastapi import HTTPException, status
-from app.models.lab_models import Laboratorio
+from app.core.exceptions import BadRequestException, NotFoundException
+from app.core.pagination import Pagina, ParametrosPaginacion
+from app.models import Laboratorio
 from app.schemas.lab_schemas import LaboratorioCreate, LaboratorioUpdate
 from app.repositories.interfaces import (
     AbstractLaboratorioRepository,
@@ -20,25 +20,21 @@ class LaboratorioService(AbstractLaboratorioService):
 
     def crear_laboratorio(self, data: LaboratorioCreate) -> Laboratorio:
         if self.lab_repo.get_by_codigo(data.codigo):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Ya existe un laboratorio con el código '{data.codigo}'.",
-            )
+            raise BadRequestException(f"Ya existe un laboratorio con el código '{data.codigo}'.")
         nuevo_lab = Laboratorio(**data.model_dump())
         return self.lab_repo.create(nuevo_lab)
 
-    def listar_laboratorios(self, solo_disponibles: bool = False) -> List[Laboratorio]:
-        if solo_disponibles:
-            return self.lab_repo.get_disponibles()
-        return self.lab_repo.get_all()
+    def listar_laboratorios(
+        self,
+        paginacion: ParametrosPaginacion,
+        solo_disponibles: bool = False,
+    ) -> Pagina[Laboratorio]:
+        return self.lab_repo.listar(paginacion, solo_disponibles)
 
     def obtener_laboratorio(self, lab_id: int) -> Laboratorio:
         lab = self.lab_repo.get_by_id(lab_id)
         if not lab:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Laboratorio con ID {lab_id} no encontrado.",
-            )
+            raise NotFoundException(f"Laboratorio con ID {lab_id} no encontrado.")
         return lab
 
     def actualizar_laboratorio(
@@ -49,18 +45,15 @@ class LaboratorioService(AbstractLaboratorioService):
 
         if "codigo" in datos and datos["codigo"] != lab.codigo:
             if self.lab_repo.get_by_codigo(datos["codigo"]):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"El código '{datos['codigo']}' ya está en uso.",
-                )
+                raise BadRequestException(f"El código '{datos['codigo']}' ya está en uso.")
 
         if "capacidad_workstations" in datos:
-            cantidad_actual = len(self.ws_repo.get_by_laboratorio(lab_id))
+            parametros = ParametrosPaginacion(pagina=1, tamano_pagina=1)
+            cantidad_actual = self.ws_repo.listar(
+                parametros, laboratorio_id=lab_id
+            ).total
             if datos["capacidad_workstations"] < cantidad_actual:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"La capacidad no puede ser menor a las {cantidad_actual} workstations ya registradas.",
-                )
+                raise BadRequestException(f"La capacidad no puede ser menor a las {cantidad_actual} workstations ya registradas.")
 
         for campo, valor in datos.items():
             setattr(lab, campo, valor)

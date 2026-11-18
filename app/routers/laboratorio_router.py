@@ -1,16 +1,16 @@
-from typing import List
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
+
+from app.core.api_response import ApiResponse
 from app.core.database import get_session
-from app.schemas.lab_schemas import (
-    LaboratorioCreate,
-    LaboratorioUpdate,
-    LaboratorioRead,
+from app.core.pagination import Pagina, ParametrosPaginacion, get_paginacion
+from app.repositories.implementaciones import (
+    LaboratorioRepository,
+    WorkstationRepository,
 )
-from app.repositories.laboratorio_repo import LaboratorioRepository
-from app.repositories.workstation_repo import WorkstationRepository
+from app.schemas.lab_schemas import LaboratorioCreate, LaboratorioRead, LaboratorioUpdate
+from app.services.implementaciones import LaboratorioService
 from app.services.interfaces import AbstractLaboratorioService
-from app.services.laboratorio_service import LaboratorioService
 
 router = APIRouter(prefix="/laboratorios", tags=["Laboratorios"])
 
@@ -24,37 +24,53 @@ def get_laboratorio_service(
     )
 
 
-@router.post("/", response_model=LaboratorioRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=ApiResponse[LaboratorioRead], status_code=status.HTTP_201_CREATED
+)
 def crear_laboratorio(
     data: LaboratorioCreate,
     service: AbstractLaboratorioService = Depends(get_laboratorio_service),
 ):
-    return service.crear_laboratorio(data)
+    return ApiResponse.ok(
+        service.crear_laboratorio(data),
+        message="Laboratorio registrado correctamente.",
+        status=status.HTTP_201_CREATED,
+    )
 
 
-@router.get("/", response_model=List[LaboratorioRead])
+@router.get("/", response_model=ApiResponse[Pagina[LaboratorioRead]])
 def listar_laboratorios(
+    paginacion: ParametrosPaginacion = Depends(get_paginacion),
     solo_disponibles: bool = False,
     service: AbstractLaboratorioService = Depends(get_laboratorio_service),
 ):
-    return service.listar_laboratorios(solo_disponibles)
+    return ApiResponse.ok(
+        service.listar_laboratorios(paginacion, solo_disponibles),
+        message="Lista de laboratorios obtenida correctamente.",
+    )
 
 
-@router.get("/{lab_id}", response_model=LaboratorioRead)
+@router.get("/{lab_id}", response_model=ApiResponse[LaboratorioRead])
 def obtener_laboratorio(
     lab_id: int,
     service: AbstractLaboratorioService = Depends(get_laboratorio_service),
 ):
-    return service.obtener_laboratorio(lab_id)
+    return ApiResponse.ok(
+        service.obtener_laboratorio(lab_id),
+        message="Laboratorio obtenido correctamente.",
+    )
 
 
-@router.put("/{lab_id}", response_model=LaboratorioRead)
+@router.put("/{lab_id}", response_model=ApiResponse[LaboratorioRead])
 def actualizar_laboratorio(
     lab_id: int,
     data: LaboratorioUpdate,
     service: AbstractLaboratorioService = Depends(get_laboratorio_service),
 ):
-    return service.actualizar_laboratorio(lab_id, data)
+    return ApiResponse.ok(
+        service.actualizar_laboratorio(lab_id, data),
+        message="Laboratorio actualizado correctamente.",
+    )
 
 
 @router.delete("/{lab_id}", status_code=status.HTTP_204_NO_CONTENT)

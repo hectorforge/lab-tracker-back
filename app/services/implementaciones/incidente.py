@@ -1,7 +1,8 @@
-from datetime import datetime
-from typing import List
-from fastapi import HTTPException, status
-from app.models.lab_models import (
+from datetime import datetime, timezone
+
+from app.core.exceptions import BadRequestException, NotFoundException
+from app.core.pagination import Pagina, ParametrosPaginacion
+from app.models import (
     Incidente,
     EstadoIncidente,
     EstadoEquipo,
@@ -34,24 +35,15 @@ class IncidenteService(AbstractIncidenteService):
         if data.equipo_id is not None:
             equipo = self.equipo_repo.get_by_id(data.equipo_id)
             if not equipo:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Equipo {data.equipo_id} no encontrado.",
-                )
+                raise NotFoundException(f"Equipo {data.equipo_id} no encontrado.")
 
         if data.workstation_id is not None:
             ws = self.ws_repo.get_by_id(data.workstation_id)
             if not ws:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Workstation {data.workstation_id} no encontrada.",
-                )
+                raise NotFoundException(f"Workstation {data.workstation_id} no encontrada.")
 
         if equipo and ws and equipo.workstation_id != ws.id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="El equipo indicado no pertenece a la workstation especificada.",
-            )
+            raise BadRequestException("El equipo indicado no pertenece a la workstation especificada.")
 
         incidente = Incidente(**data.model_dump())
         creado = self.incidente_repo.create(incidente)
@@ -66,26 +58,27 @@ class IncidenteService(AbstractIncidenteService):
 
         return creado
 
-    def listar_incidentes(self, solo_pendientes: bool = False) -> List[Incidente]:
-        if solo_pendientes:
-            return self.incidente_repo.get_pendientes()
-        return self.incidente_repo.get_all()
+    def listar_incidentes(
+        self, paginacion: ParametrosPaginacion, solo_pendientes: bool = False
+    ) -> Pagina[Incidente]:
+        return self.incidente_repo.listar(paginacion, solo_pendientes)
 
-    def listar_por_equipo(self, equipo_id: int) -> List[Incidente]:
-        return self.incidente_repo.get_by_equipo(equipo_id)
+    def listar_por_equipo(
+        self, paginacion: ParametrosPaginacion, equipo_id: int
+    ) -> Pagina[Incidente]:
+        return self.incidente_repo.listar(paginacion, equipo_id=equipo_id)
 
-    def listar_por_workstation(self, workstation_id: int) -> List[Incidente]:
-        return self.incidente_repo.get_by_workstation(workstation_id)
+    def listar_por_workstation(
+        self, paginacion: ParametrosPaginacion, workstation_id: int
+    ) -> Pagina[Incidente]:
+        return self.incidente_repo.listar(paginacion, workstation_id=workstation_id)
 
     def actualizar_estado(
         self, incidente_id: int, data: IncidenteUpdateEstado
     ) -> Incidente:
         incidente = self.incidente_repo.get_by_id(incidente_id)
         if not incidente:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Incidente {incidente_id} no encontrado.",
-            )
+            raise NotFoundException(f"Incidente {incidente_id} no encontrado.")
 
         incidente.estado = data.estado
         equipo = (
@@ -110,7 +103,7 @@ class IncidenteService(AbstractIncidenteService):
             return self.incidente_repo.update(incidente)
 
         if data.estado == EstadoIncidente.RESUELTO:
-            incidente.fecha_resolucion = datetime.now()
+            incidente.fecha_resolucion = datetime.now(timezone.utc)
             actualizado = self.incidente_repo.update(incidente)
 
             if (
