@@ -1,8 +1,10 @@
 @baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_AUTH_LOGIN_AQUI
 @tipoId = 1
 
 ### Crear tipo de equipo (categoría genérica)
 POST {{baseUrl}}/tipos-equipo/
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -21,12 +23,15 @@ Content-Type: application/json
 
 ### Listar tipos de equipo (paginado y filtrado)
 GET {{baseUrl}}/tipos-equipo/?pagina=1&tamano_pagina=10&solo_activos=true&categoria=hardware
+Authorization: Bearer {{token}}
 
 ### Obtener tipo de equipo
 GET {{baseUrl}}/tipos-equipo/{{tipoId}}
+Authorization: Bearer {{token}}
 
 ### Actualizar tipo de equipo
 PUT {{baseUrl}}/tipos-equipo/{{tipoId}}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -37,3 +42,4 @@ Content-Type: application/json
 
 ### Eliminar tipo de equipo
 DELETE {{baseUrl}}/tipos-equipo/{{tipoId}}
+Authorization: Bearer {{token}}

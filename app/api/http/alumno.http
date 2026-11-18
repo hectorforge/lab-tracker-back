@@ -1,8 +1,10 @@
 @baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_AUTH_LOGIN_AQUI
 @alumnoId = 1
 
 ### Crear alumno
 POST {{baseUrl}}/alumnos/
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -24,12 +26,15 @@ Content-Type: application/json
 
 ### Listar alumnos (paginado y filtrado)
 GET {{baseUrl}}/alumnos/?pagina=1&tamano_pagina=10&carrera=Sistemas&estado=activo&busqueda=Ana
+Authorization: Bearer {{token}}
 
 ### Obtener alumno
 GET {{baseUrl}}/alumnos/{{alumnoId}}
+Authorization: Bearer {{token}}
 
 ### Actualizar alumno
 PUT {{baseUrl}}/alumnos/{{alumnoId}}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -40,3 +45,4 @@ Content-Type: application/json
 
 ### Eliminar alumno
 DELETE {{baseUrl}}/alumnos/{{alumnoId}}
+Authorization: Bearer {{token}}

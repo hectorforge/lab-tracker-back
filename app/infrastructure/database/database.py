@@ -69,6 +69,10 @@ def create_db_and_tables() -> None:
     if ES_SQLITE:
         _migrar_columnas_sqlite()
 
+    from app.infrastructure.database.seed import sembrar_datos_base
+
+    sembrar_datos_base()
+
 
 def get_session() -> Generator[Session, None, None]:
     with Session(engine) as session:

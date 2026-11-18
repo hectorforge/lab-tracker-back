@@ -12,3 +12,5 @@ from .alumno import Alumno
 from .matricula import Matricula
 from .asignacion_workstation import AsignacionWorkstation
 from .incidente import Incidente
+from .rol import Rol
+from .usuario import Usuario

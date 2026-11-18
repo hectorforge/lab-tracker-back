@@ -1,6 +1,14 @@
 import enum
 
 
+class RolNombre(str, enum.Enum):
+    """Roles del sistema interno de laboratorios."""
+
+    ADMINISTRADOR = "administrador"
+    GESTION_LABORATORIOS = "gestion_laboratorios"
+    DOCENTE = "docente"
+
+
 class EstadoLaboratorio(str, enum.Enum):
     DISPONIBLE = "disponible"
     MANTENIMIENTO = "mantenimiento"

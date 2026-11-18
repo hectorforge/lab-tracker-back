@@ -2,11 +2,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, status
 
+from app.api.security import requiere_admin, requiere_lectura
 from app.api.api_response import ApiResponse
 from app.infrastructure.database.database import get_session
 from app.api.pagination import Pagina, ParametrosPaginacion, get_paginacion
 from app.application.dtos import ActualizarAlumnoDTO, CrearAlumnoDTO, AlumnoDTO
-from app.domain.entities import EstadoAlumno
+from app.domain.entities import EstadoAlumno, Usuario
 from app.infrastructure.repositories import AlumnoRepository
 from app.application.services import AlumnoService
 from app.application.interfaces import AbstractAlumnoService
@@ -27,6 +28,7 @@ def get_alumno_service(
 def crear_alumno(
     data: CrearAlumnoDTO,
     service: AbstractAlumnoService = Depends(get_alumno_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.crear_alumno(data),
@@ -42,6 +44,7 @@ def listar_alumnos(
     estado: Optional[EstadoAlumno] = Query(default=None),
     busqueda: Optional[str] = Query(default=None),
     service: AbstractAlumnoService = Depends(get_alumno_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_alumnos(paginacion, carrera, estado, busqueda),
@@ -53,6 +56,7 @@ def listar_alumnos(
 def obtener_alumno(
     alumno_id: int,
     service: AbstractAlumnoService = Depends(get_alumno_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.obtener_alumno(alumno_id), message="Alumno obtenido correctamente."
@@ -64,6 +68,7 @@ def actualizar_alumno(
     alumno_id: int,
     data: ActualizarAlumnoDTO,
     service: AbstractAlumnoService = Depends(get_alumno_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.actualizar_alumno(
@@ -77,5 +82,6 @@ def actualizar_alumno(
 def eliminar_alumno(
     alumno_id: int,
     service: AbstractAlumnoService = Depends(get_alumno_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     service.eliminar_alumno(alumno_id)

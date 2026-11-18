@@ -8,3 +8,5 @@ from .licencia_repository_impl import LicenciaRepository
 from .matricula_repository_impl import MatriculaRepository
 from .tipo_equipo_repository_impl import TipoEquipoRepository
 from .workstation_repository_impl import WorkstationRepository
+from .rol_repository_impl import RolRepository
+from .usuario_repository_impl import UsuarioRepository

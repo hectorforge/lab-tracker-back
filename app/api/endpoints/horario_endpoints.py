@@ -4,10 +4,11 @@ from typing import Optional
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
+from app.api.security import requiere_admin, requiere_lectura
 from app.api.api_response import ApiResponse
 from app.infrastructure.database.database import get_session
 from app.api.pagination import Pagina, ParametrosPaginacion, get_paginacion
-from app.domain.entities import EstadoHorario
+from app.domain.entities import EstadoHorario, Usuario
 from app.infrastructure.repositories import (
     HorarioRepository,
     LaboratorioRepository,
@@ -41,6 +42,7 @@ def get_horario_service(
 def crear_horario(
     data: CrearHorarioDTO,
     service: AbstractHorarioService = Depends(get_horario_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.crear_horario(data),
@@ -56,6 +58,7 @@ def listar_horarios(
     fecha: Optional[date] = None,
     estado: Optional[EstadoHorario] = None,
     service: AbstractHorarioService = Depends(get_horario_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_horarios(paginacion, laboratorio_id, fecha, estado),
@@ -67,6 +70,7 @@ def listar_horarios(
 def obtener_horario(
     horario_id: int,
     service: AbstractHorarioService = Depends(get_horario_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.obtener_horario(horario_id), message="Horario obtenido correctamente."
@@ -77,6 +81,7 @@ def obtener_horario(
 def iniciar_turno(
     horario_id: int,
     service: AbstractHorarioService = Depends(get_horario_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.iniciar_turno(horario_id), message="Turno iniciado correctamente."
@@ -87,6 +92,7 @@ def iniciar_turno(
 def finalizar_turno(
     horario_id: int,
     service: AbstractHorarioService = Depends(get_horario_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.finalizar_turno(horario_id),
@@ -98,6 +104,7 @@ def finalizar_turno(
 def cancelar_turno(
     horario_id: int,
     service: AbstractHorarioService = Depends(get_horario_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.cancelar_turno(horario_id), message="Turno cancelado correctamente."
@@ -113,6 +120,7 @@ def asignar_workstation_en_turno(
     horario_id: int,
     data: CrearAsignacionDTO,
     service: AbstractHorarioService = Depends(get_horario_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.asignar_workstation(horario_id, data),
@@ -128,6 +136,7 @@ def listar_asignaciones_turno(
     horario_id: int,
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractHorarioService = Depends(get_horario_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_asignaciones_turno(paginacion, horario_id),
@@ -143,6 +152,7 @@ def historial_responsabilidad_alumno(
     codigo_alumno: str,
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractHorarioService = Depends(get_horario_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.consultar_historial_alumno(paginacion, codigo_alumno),

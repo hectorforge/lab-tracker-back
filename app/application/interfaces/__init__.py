@@ -7,3 +7,6 @@ from .licencia_service import AbstractLicenciaService
 from .matricula_service import AbstractMatriculaService
 from .tipo_equipo_service import AbstractTipoEquipoService
 from .workstation_service import AbstractWorkstationService
+from .rol_service import AbstractRolService
+from .usuario_service import AbstractUsuarioService
+from .auth_service import AbstractAuthService

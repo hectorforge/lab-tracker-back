@@ -8,3 +8,6 @@ from .licencia_service_impl import LicenciaService
 from .matricula_service_impl import MatriculaService
 from .tipo_equipo_service_impl import TipoEquipoService
 from .workstation_service_impl import WorkstationService
+from .rol_service_impl import RolService
+from .usuario_service_impl import UsuarioService
+from .auth_service_impl import AuthService

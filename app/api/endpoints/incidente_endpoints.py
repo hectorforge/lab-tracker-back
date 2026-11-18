@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
+from app.api.security import requiere_admin, requiere_admin_o_docente, requiere_lectura
+from app.domain.entities import Usuario
 from app.api.api_response import ApiResponse
 from app.infrastructure.database.database import get_session
 from app.api.pagination import Pagina, ParametrosPaginacion, get_paginacion
@@ -36,6 +38,7 @@ def get_incidente_service(
 def reportar_incidente(
     data: CrearIncidenteDTO,
     service: AbstractIncidenteService = Depends(get_incidente_service),
+    _: Usuario = Depends(requiere_admin_o_docente),
 ):
     return ApiResponse.ok(
         service.reportar_incidente(data),
@@ -49,6 +52,7 @@ def listar_incidentes(
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     solo_pendientes: bool = False,
     service: AbstractIncidenteService = Depends(get_incidente_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_incidentes(paginacion, solo_pendientes),
@@ -61,6 +65,7 @@ def listar_incidentes_por_equipo(
     equipo_id: int,
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractIncidenteService = Depends(get_incidente_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_por_equipo(paginacion, equipo_id),
@@ -75,6 +80,7 @@ def listar_incidentes_por_workstation(
     workstation_id: int,
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractIncidenteService = Depends(get_incidente_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_por_workstation(paginacion, workstation_id),
@@ -87,6 +93,7 @@ def actualizar_estado_incidente(
     incidente_id: int,
     data: ActualizarEstadoIncidenteDTO,
     service: AbstractIncidenteService = Depends(get_incidente_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.actualizar_estado(incidente_id, data),

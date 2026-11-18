@@ -37,6 +37,13 @@ from .matricula_dto import (
     ResultadoCargaMatriculaDTO,
     ColumnaPlantillaDTO,
 )
+from .rol_dto import RolDTO, CrearRolDTO, ActualizarRolDTO
+from .usuario_dto import (
+    UsuarioDTO,
+    CrearUsuarioDTO,
+    ActualizarUsuarioDTO,
+)
+from .auth_dto import LoginDTO, TokenDTO
 
 __all__ = [
     "AlumnoDTO", "CrearAlumnoDTO", "ActualizarAlumnoDTO",
@@ -49,4 +56,7 @@ __all__ = [
     "IncidenteDTO", "CrearIncidenteDTO", "ActualizarEstadoIncidenteDTO",
     "MatriculaDTO", "CrearMatriculaDTO", "FilaMatriculaDTO",
     "ErrorFilaExcelDTO", "ResultadoCargaMatriculaDTO", "ColumnaPlantillaDTO",
+    "RolDTO", "CrearRolDTO", "ActualizarRolDTO",
+    "UsuarioDTO", "CrearUsuarioDTO", "ActualizarUsuarioDTO",
+    "LoginDTO", "TokenDTO",
 ]

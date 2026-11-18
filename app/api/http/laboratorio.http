@@ -1,8 +1,10 @@
 @baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_AUTH_LOGIN_AQUI
 @labId = 1
 
 ### Crear laboratorio
 POST {{baseUrl}}/laboratorios/
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -16,12 +18,15 @@ Content-Type: application/json
 
 ### Listar laboratorios (paginado)
 GET {{baseUrl}}/laboratorios/?pagina=1&tamano_pagina=10&solo_disponibles=true
+Authorization: Bearer {{token}}
 
 ### Obtener laboratorio
 GET {{baseUrl}}/laboratorios/{{labId}}
+Authorization: Bearer {{token}}
 
 ### Actualizar laboratorio
 PUT {{baseUrl}}/laboratorios/{{labId}}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -32,3 +37,4 @@ Content-Type: application/json
 
 ### Eliminar laboratorio
 DELETE {{baseUrl}}/laboratorios/{{labId}}
+Authorization: Bearer {{token}}

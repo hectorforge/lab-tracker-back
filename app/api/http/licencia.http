@@ -1,10 +1,12 @@
 @baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_AUTH_LOGIN_AQUI
 @equipoId = 1
 @tipoId = 1
 @licenciaId = 1
 
 ### Crear licencia por equipo
 POST {{baseUrl}}/licencias/
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -26,12 +28,15 @@ Content-Type: application/json
 
 ### Listar licencias (paginado y filtrado)
 GET {{baseUrl}}/licencias/?pagina=1&tamano_pagina=10&equipo_id={{equipoId}}&estado=activa
+Authorization: Bearer {{token}}
 
 ### Obtener licencia
 GET {{baseUrl}}/licencias/{{licenciaId}}
+Authorization: Bearer {{token}}
 
 ### Actualizar licencia
 PUT {{baseUrl}}/licencias/{{licenciaId}}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -42,3 +47,4 @@ Content-Type: application/json
 
 ### Eliminar licencia
 DELETE {{baseUrl}}/licencias/{{licenciaId}}
+Authorization: Bearer {{token}}

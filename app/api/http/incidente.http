@@ -1,10 +1,12 @@
 @baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_AUTH_LOGIN_AQUI
 @equipoId = 1
 @wsId = 1
 @incidenteId = 1
 
 ### Reportar incidente (con enlaces de fotos como adjunto)
 POST {{baseUrl}}/incidentes/
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -21,15 +23,19 @@ Content-Type: application/json
 
 ### Listar incidentes (paginado)
 GET {{baseUrl}}/incidentes/?pagina=1&tamano_pagina=10&solo_pendientes=true
+Authorization: Bearer {{token}}
 
 ### Listar incidentes por equipo
 GET {{baseUrl}}/incidentes/equipo/{{equipoId}}?pagina=1&tamano_pagina=10
+Authorization: Bearer {{token}}
 
 ### Listar incidentes por workstation
 GET {{baseUrl}}/incidentes/workstation/{{wsId}}?pagina=1&tamano_pagina=10
+Authorization: Bearer {{token}}
 
 ### Actualizar estado (adjuntar fotos de la reparacion)
 PATCH {{baseUrl}}/incidentes/{{incidenteId}}/estado
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {

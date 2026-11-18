@@ -3,11 +3,12 @@ from typing import Optional
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
+from app.api.security import requiere_admin, requiere_lectura
 from app.api.api_response import ApiResponse
 from app.infrastructure.database.database import get_session
 from app.api.pagination import Pagina, ParametrosPaginacion, get_paginacion
 from app.application.dtos import ActualizarEquipoDTO, CrearEquipoDTO, EquipoDTO
-from app.domain.entities import CategoriaTipoEquipo
+from app.domain.entities import CategoriaTipoEquipo, Usuario
 from app.infrastructure.repositories import (
     EquipoRepository,
     LaboratorioRepository,
@@ -37,6 +38,7 @@ def get_equipo_service(
 def registrar_equipo(
     data: CrearEquipoDTO,
     service: AbstractEquipoService = Depends(get_equipo_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.registrar_equipo(data),
@@ -49,6 +51,7 @@ def registrar_equipo(
 def listar_equipos(
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractEquipoService = Depends(get_equipo_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_equipos(paginacion),
@@ -62,6 +65,7 @@ def listar_equipos_por_laboratorio(
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     categoria: Optional[CategoriaTipoEquipo] = None,
     service: AbstractEquipoService = Depends(get_equipo_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_por_laboratorio(paginacion, lab_id, categoria),
@@ -76,6 +80,7 @@ def listar_equipos_por_workstation(
     workstation_id: int,
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractEquipoService = Depends(get_equipo_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_por_workstation(paginacion, workstation_id),
@@ -87,6 +92,7 @@ def listar_equipos_por_workstation(
 def obtener_equipo(
     equipo_id: int,
     service: AbstractEquipoService = Depends(get_equipo_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.obtener_equipo(equipo_id), message="Equipo obtenido correctamente."
@@ -98,6 +104,7 @@ def actualizar_equipo(
     equipo_id: int,
     data: ActualizarEquipoDTO,
     service: AbstractEquipoService = Depends(get_equipo_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.actualizar_equipo(
@@ -111,5 +118,6 @@ def actualizar_equipo(
 def eliminar_equipo(
     equipo_id: int,
     service: AbstractEquipoService = Depends(get_equipo_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     service.eliminar_equipo(equipo_id)

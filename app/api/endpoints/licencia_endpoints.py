@@ -3,11 +3,12 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query, status
 from sqlmodel import Session
 
+from app.api.security import requiere_admin, requiere_lectura
 from app.api.api_response import ApiResponse
 from app.infrastructure.database.database import get_session
 from app.api.pagination import Pagina, ParametrosPaginacion, get_paginacion
 from app.application.dtos import ActualizarLicenciaDTO, CrearLicenciaDTO, LicenciaDTO
-from app.domain.entities import EstadoLicencia
+from app.domain.entities import EstadoLicencia, Usuario
 from app.infrastructure.repositories import (
     EquipoRepository,
     LicenciaRepository,
@@ -35,6 +36,7 @@ def get_licencia_service(
 def crear_licencia(
     data: CrearLicenciaDTO,
     service: AbstractLicenciaService = Depends(get_licencia_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.crear_licencia(data),
@@ -49,6 +51,7 @@ def listar_licencias(
     equipo_id: Optional[int] = Query(default=None),
     estado: Optional[EstadoLicencia] = Query(default=None),
     service: AbstractLicenciaService = Depends(get_licencia_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_licencias(paginacion, equipo_id, estado),
@@ -60,6 +63,7 @@ def listar_licencias(
 def obtener_licencia(
     licencia_id: int,
     service: AbstractLicenciaService = Depends(get_licencia_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.obtener_licencia(licencia_id),
@@ -72,6 +76,7 @@ def actualizar_licencia(
     licencia_id: int,
     data: ActualizarLicenciaDTO,
     service: AbstractLicenciaService = Depends(get_licencia_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.actualizar_licencia(
@@ -85,5 +90,6 @@ def actualizar_licencia(
 def eliminar_licencia(
     licencia_id: int,
     service: AbstractLicenciaService = Depends(get_licencia_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     service.eliminar_licencia(licencia_id)

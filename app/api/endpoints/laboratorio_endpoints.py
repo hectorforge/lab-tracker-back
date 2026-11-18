@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
+from app.api.security import requiere_admin, requiere_lectura
+from app.domain.entities import Usuario
 from app.api.api_response import ApiResponse
 from app.infrastructure.database.database import get_session
 from app.api.pagination import Pagina, ParametrosPaginacion, get_paginacion
@@ -30,6 +32,7 @@ def get_laboratorio_service(
 def crear_laboratorio(
     data: CrearLaboratorioDTO,
     service: AbstractLaboratorioService = Depends(get_laboratorio_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.crear_laboratorio(data),
@@ -43,6 +46,7 @@ def listar_laboratorios(
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     solo_disponibles: bool = False,
     service: AbstractLaboratorioService = Depends(get_laboratorio_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_laboratorios(paginacion, solo_disponibles),
@@ -54,6 +58,7 @@ def listar_laboratorios(
 def obtener_laboratorio(
     lab_id: int,
     service: AbstractLaboratorioService = Depends(get_laboratorio_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.obtener_laboratorio(lab_id),
@@ -66,6 +71,7 @@ def actualizar_laboratorio(
     lab_id: int,
     data: ActualizarLaboratorioDTO,
     service: AbstractLaboratorioService = Depends(get_laboratorio_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.actualizar_laboratorio(lab_id, data),
@@ -77,5 +83,6 @@ def actualizar_laboratorio(
 def eliminar_laboratorio(
     lab_id: int,
     service: AbstractLaboratorioService = Depends(get_laboratorio_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     service.eliminar_laboratorio(lab_id)

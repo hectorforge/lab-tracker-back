@@ -1,0 +1,36 @@
+@baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_ADMIN_AQUI
+@rolId = 1
+
+### Listar roles (solo administrador)
+GET {{baseUrl}}/roles/?pagina=1&tamano_pagina=10&solo_activos=true
+Authorization: Bearer {{token}}
+
+### Obtener rol
+GET {{baseUrl}}/roles/{{rolId}}
+Authorization: Bearer {{token}}
+
+### Crear rol (el nombre debe ser administrador, gestion_laboratorios o docente)
+POST {{baseUrl}}/roles/
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "docente",
+  "descripcion": "Consulta de horarios y matriculas; reporta incidentes",
+  "es_activo": true
+}
+
+### Actualizar rol
+PUT {{baseUrl}}/roles/{{rolId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "descripcion": "Rol actualizado",
+  "es_activo": true
+}
+
+### Eliminar rol
+DELETE {{baseUrl}}/roles/{{rolId}}
+Authorization: Bearer {{token}}

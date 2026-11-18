@@ -103,6 +103,11 @@ Los listados aceptan `?pagina=1&tamano_pagina=10` (máx. 100). En caso de error,
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
+| POST | `/auth/login` | Login con `username` + `password`; devuelve JWT. |
+| GET | `/auth/me` | Datos del usuario autenticado. |
+| POST / PUT / GET / DELETE | `/roles` | CRUD de roles (solo administrador). |
+| POST / PUT / GET / DELETE | `/usuarios` | CRUD de usuarios internos con foto (solo administrador). |
+| --- | --- | --- |
 | POST / PUT / GET / DELETE | `/tipos-equipo` | CRUD del catálogo (categoría genérica, vida útil, costo referencial, licencia requerida, estado). |
 | POST / PUT / GET / DELETE | `/licencias` | CRUD de licencias por equipo o por tipo de equipo. Filtros: `equipo_id`, `estado`. |
 | POST / PUT / GET / DELETE | `/alumnos` | CRUD de alumnos. Filtros: `carrera`, `estado`, `busqueda`, `skip`, `limit`. |
@@ -118,6 +123,36 @@ El campo `tipo_equipo_id` de `/equipos` vincula el equipo físico con el catálo
 - La antigua enumeración de equipos specific (`cpu`, `monitor`, …) se reemplazó por `CategoriaTipoEquipo`, una lista **genérica de etiquetas**: `hardware`, `software`, `redes`, `periferico`, `almacenamiento`, `seguridad`, `mobiliario`, `otro`. El tipo concreto (CPU Docente, Monitor 24", etc.) se describe en `tipos_equipo.nombre`.
 - `Equipo` registra `costo_estimado`, `costo_adquisicion`, `moneda`, `fecha_adquisicion`, `proveedor` y `garantia_hasta`. `TipoEquipo` registra `costo_referencial`, `moneda` y `requiere_licencia`.
 - `Licencia` permite `tipo` (perpetua, suscripción, OEM, académica, prueba), `clave_producto`, `fabricante`, `cantidad_usuarios`, `fecha_vencimiento`, `costo`, `moneda`, `estado` y su vínculo con `equipo_id` y/o `tipo_equipo_id`. El servicio valida que el equipo y el tipo existan, que la categoría sea coherente y que una licencia vencida no quede activa.
+
+### Seguridad, roles y permisos
+
+El acceso es **solo interno** y se realiza exclusivamente con `username` + `password` mediante `POST /auth/login`. La respuesta trae el JWT en `details.access_token`; envíalo en el header `Authorization: Bearer <token>` en las demás peticiones. `GET /auth/me` devuelve el usuario autenticado.
+
+Roles sembrados automáticamente al arrancar:
+
+| Rol | Permisos |
+| --- | --- |
+| `administrador` | Acceso total: CRUD de laboratorios, workstations, equipos, tipos de equipo, licencias, alumnos, horarios, asignaciones, matrículas (incluida la carga Excel), incidencias, usuarios y roles. |
+| `gestion_laboratorios` | **Solo consulta** de laboratorios, workstations, equipos, tipos de equipo, licencias, alumnos, horarios, asignaciones, matrículas e incidencias. Puede ver los alumnos asignados a cada laboratorio/equipo, pero no modificar nada. |
+| `docente` | **Solo consulta** de horarios, matriculas, asignaciones, alumnos y equipos. Además puede **reportar incidentes** (`POST /incidentes/`). No puede gestionar usuarios, roles ni catálogos. |
+
+Todos los endpoints van protegidos con una dependencia de rol (`requiere_admin`, `requiere_lectura`, `requiere_admin_o_docente`). Un rol no autorizado recibe `403` con `codigo: FORBIDDEN`; sin token o con token inválido/expirado, `401` con `codigo: UNAUTHORIZED`.
+
+Variables de entorno de seguridad (ver `.env.example`):
+
+```
+JWT_SECRET_KEY=cambiar-este-secreto-en-produccion
+JWT_ALGORITHM=HS256
+JWT_EXPIRE_MINUTES=60
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+RATE_LIMIT_PER_MINUTE=100
+LOGIN_RATE_LIMIT_PER_MINUTE=5
+```
+
+**Rate limiting**: middleware en memoria con ventana deslizante de 60 s por IP. General: 100 req/min; `/auth/login`: 5 req/min para mitigar fuerza bruta. Al excederse responde `429` con `codigo: RATE_LIMIT_EXCEEDED`, header `Retry-After` y cabeceras `X-RateLimit-Limit`/`X-RateLimit-Remaining`. En despliegues multi-instancia se debe usar un backend compartido (Redis). También se añaden cabeceras de seguridad (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`).
+
+Las contraseñas se almacenan con hash **bcrypt**; nunca se exponen en los DTOs.
 
 ### Imágenes y adjuntos
 

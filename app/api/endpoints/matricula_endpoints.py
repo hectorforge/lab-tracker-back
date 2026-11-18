@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 
+from app.api.security import requiere_admin, requiere_lectura
+from app.domain.entities import Usuario
 from app.api.api_response import ApiResponse
 from app.infrastructure.database.database import get_session
 from app.api.pagination import Pagina, ParametrosPaginacion, get_paginacion
@@ -43,6 +45,7 @@ def cargar_matriculas_desde_excel(
     ),
     archivo: UploadFile = File(..., description="Archivo .xlsx con los matriculados"),
     service: AbstractMatriculaService = Depends(get_matricula_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.cargar_matriculas_desde_excel(
@@ -58,6 +61,7 @@ def cargar_matriculas_desde_excel(
 @router.get("/plantilla", response_model=ApiResponse[list[ColumnaPlantillaDTO]])
 def columnas_plantilla(
     service: AbstractMatriculaService = Depends(get_matricula_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.columnas_plantilla(),
@@ -70,6 +74,7 @@ def listar_matriculas_por_horario(
     horario_id: int,
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractMatriculaService = Depends(get_matricula_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_matriculas_por_horario(paginacion, horario_id),
@@ -81,5 +86,6 @@ def listar_matriculas_por_horario(
 def eliminar_matricula(
     matricula_id: int,
     service: AbstractMatriculaService = Depends(get_matricula_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     service.eliminar_matricula(matricula_id)

@@ -1,14 +1,17 @@
 @baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_AUTH_LOGIN_AQUI
 @horarioId = 1
 @matriculaId = 1
 
 ### Columnas de la plantilla Excel
 GET {{baseUrl}}/matriculas/plantilla
+Authorization: Bearer {{token}}
 
 ### Cargar matriculados desde Excel (modo atomico)
 # El archivo de ejemplo se puede generar con:
 # python -c "from openpyxl import Workbook; w=Workbook(); s=w.active; s.append(['codigo','nombres','apellidos','correo_institucional','carrera']); s.append(['20240001','Ana','Lopez','ana@universidad.edu.pe','Ingenieria de Sistemas']); w.save('matriculados.xlsx')"
 POST {{baseUrl}}/matriculas/carga-excel
+Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
@@ -28,6 +31,7 @@ Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 ### Cargar matriculados desde Excel (solo filas validas)
 POST {{baseUrl}}/matriculas/carga-excel
+Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
@@ -47,6 +51,8 @@ Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 ### Listar matriculados de un horario (paginado)
 GET {{baseUrl}}/matriculas/horario/{{horarioId}}?pagina=1&tamano_pagina=10
+Authorization: Bearer {{token}}
 
 ### Eliminar matricula
 DELETE {{baseUrl}}/matriculas/{{matriculaId}}
+Authorization: Bearer {{token}}

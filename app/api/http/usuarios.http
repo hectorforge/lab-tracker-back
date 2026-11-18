@@ -1,0 +1,42 @@
+@baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_ADMIN_AQUI
+@usuarioId = 2
+@rolDocenteId = 3
+
+### Listar usuarios (solo administrador)
+GET {{baseUrl}}/usuarios/?pagina=1&tamano_pagina=10&solo_activos=true
+Authorization: Bearer {{token}}
+
+### Obtener usuario
+GET {{baseUrl}}/usuarios/{{usuarioId}}
+Authorization: Bearer {{token}}
+
+### Crear usuario con foto (solo administrador)
+POST {{baseUrl}}/usuarios/
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "docente1",
+  "nombres": "Ana",
+  "apellidos": "Perez",
+  "correo": "ana.perez@universidad.edu.pe",
+  "password": "clave12345",
+  "url_imagen": "https://images.example.edu/usuarios/ana.jpg",
+  "activo": true,
+  "rol_id": {{rolDocenteId}}
+}
+
+### Actualizar usuario (foto, contrasena o rol)
+PUT {{baseUrl}}/usuarios/{{usuarioId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "url_imagen": "https://images.example.edu/usuarios/ana-nueva.jpg",
+  "activo": true
+}
+
+### Eliminar usuario
+DELETE {{baseUrl}}/usuarios/{{usuarioId}}
+Authorization: Bearer {{token}}

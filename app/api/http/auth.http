@@ -1,0 +1,15 @@
+@baseUrl = http://127.0.0.1:8000
+
+### Login (unico medio de acceso: username + password)
+# El token devuelto está en: details.access_token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### Usuario autenticado actual
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}

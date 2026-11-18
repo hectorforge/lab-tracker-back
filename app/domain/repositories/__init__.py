@@ -7,3 +7,5 @@ from .licencia_repository import AbstractLicenciaRepository
 from .matricula_repository import AbstractMatriculaRepository
 from .tipo_equipo_repository import AbstractTipoEquipoRepository
 from .workstation_repository import AbstractWorkstationRepository
+from .rol_repository import AbstractRolRepository
+from .usuario_repository import AbstractUsuarioRepository

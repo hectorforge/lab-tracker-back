@@ -1,10 +1,12 @@
 @baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_AUTH_LOGIN_AQUI
 @labId = 1
 @wsId = 1
 @horarioId = 1
 
 ### Crear horario / turno
 POST {{baseUrl}}/horarios/
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -18,21 +20,27 @@ Content-Type: application/json
 
 ### Listar horarios (paginado)
 GET {{baseUrl}}/horarios/?pagina=1&tamano_pagina=10&laboratorio_id={{labId}}&estado=programado
+Authorization: Bearer {{token}}
 
 ### Obtener horario
 GET {{baseUrl}}/horarios/{{horarioId}}
+Authorization: Bearer {{token}}
 
 ### Iniciar turno
 PATCH {{baseUrl}}/horarios/{{horarioId}}/iniciar
+Authorization: Bearer {{token}}
 
 ### Finalizar turno
 PATCH {{baseUrl}}/horarios/{{horarioId}}/finalizar
+Authorization: Bearer {{token}}
 
 ### Cancelar turno
 PATCH {{baseUrl}}/horarios/{{horarioId}}/cancelar
+Authorization: Bearer {{token}}
 
 ### Asignar workstation a un alumno responsable
 POST {{baseUrl}}/horarios/{{horarioId}}/asignaciones
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -43,6 +51,8 @@ Content-Type: application/json
 
 ### Listar asignaciones del turno (paginado)
 GET {{baseUrl}}/horarios/{{horarioId}}/asignaciones?pagina=1&tamano_pagina=10
+Authorization: Bearer {{token}}
 
 ### Historial de asignaciones de un alumno (paginado)
 GET {{baseUrl}}/horarios/alumnos/20240001/historial?pagina=1&tamano_pagina=10
+Authorization: Bearer {{token}}

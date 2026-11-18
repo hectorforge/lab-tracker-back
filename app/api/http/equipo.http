@@ -1,4 +1,5 @@
 @baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_AUTH_LOGIN_AQUI
 @labId = 1
 @wsId = 1
 @tipoId = 1
@@ -6,6 +7,7 @@
 
 ### Registrar equipo (con costos y URL de imagen)
 POST {{baseUrl}}/equipos/
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -31,18 +33,23 @@ Content-Type: application/json
 
 ### Listar equipos (paginado)
 GET {{baseUrl}}/equipos/?pagina=1&tamano_pagina=10
+Authorization: Bearer {{token}}
 
 ### Listar equipos por laboratorio y categoría
 GET {{baseUrl}}/equipos/laboratorio/{{labId}}?categoria=hardware&pagina=1&tamano_pagina=10
+Authorization: Bearer {{token}}
 
 ### Listar equipos por workstation
 GET {{baseUrl}}/equipos/workstation/{{wsId}}?pagina=1&tamano_pagina=10
+Authorization: Bearer {{token}}
 
 ### Obtener equipo
 GET {{baseUrl}}/equipos/{{equipoId}}
+Authorization: Bearer {{token}}
 
 ### Actualizar equipo (cambiar imagen y costo)
 PUT {{baseUrl}}/equipos/{{equipoId}}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -53,3 +60,4 @@ Content-Type: application/json
 
 ### Eliminar equipo
 DELETE {{baseUrl}}/equipos/{{equipoId}}
+Authorization: Bearer {{token}}

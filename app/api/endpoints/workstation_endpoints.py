@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
+from app.api.security import requiere_admin, requiere_lectura
+from app.domain.entities import Usuario
 from app.api.api_response import ApiResponse
 from app.infrastructure.database.database import get_session
 from app.api.pagination import Pagina, ParametrosPaginacion, get_paginacion
@@ -30,6 +32,7 @@ def get_workstation_service(
 def crear_workstation(
     data: CrearWorkstationDTO,
     service: AbstractWorkstationService = Depends(get_workstation_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.crear_workstation(data),
@@ -43,6 +46,7 @@ def listar_workstations_por_laboratorio(
     lab_id: int,
     paginacion: ParametrosPaginacion = Depends(get_paginacion),
     service: AbstractWorkstationService = Depends(get_workstation_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.listar_por_laboratorio(paginacion, lab_id),
@@ -54,6 +58,7 @@ def listar_workstations_por_laboratorio(
 def obtener_workstation(
     workstation_id: int,
     service: AbstractWorkstationService = Depends(get_workstation_service),
+    _: Usuario = Depends(requiere_lectura),
 ):
     return ApiResponse.ok(
         service.obtener_workstation(workstation_id),
@@ -66,6 +71,7 @@ def actualizar_workstation(
     workstation_id: int,
     data: ActualizarWorkstationDTO,
     service: AbstractWorkstationService = Depends(get_workstation_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     return ApiResponse.ok(
         service.actualizar_workstation(workstation_id, data),
@@ -77,5 +83,6 @@ def actualizar_workstation(
 def eliminar_workstation(
     workstation_id: int,
     service: AbstractWorkstationService = Depends(get_workstation_service),
+    _: Usuario = Depends(requiere_admin),
 ):
     service.eliminar_workstation(workstation_id)

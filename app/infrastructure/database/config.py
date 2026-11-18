@@ -14,6 +14,19 @@ class Settings(BaseSettings):
         "postgresql+psycopg://labtracker:labtracker@localhost:5432/labtracker"
     )
 
+    # Seguridad (JWT)
+    JWT_SECRET_KEY: str = "cambiar-este-secreto-en-produccion-labtracker-2026"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 60
+
+    # Usuario administrador creado al arrancar si no existe.
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "admin123"
+
+    # Limitacion de peticiones (ventana de 60 segundos)
+    RATE_LIMIT_PER_MINUTE: int = 100
+    LOGIN_RATE_LIMIT_PER_MINUTE: int = 5
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

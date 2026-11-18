@@ -1,9 +1,11 @@
 @baseUrl = http://127.0.0.1:8000
+@token = PEGAR_ACCESS_TOKEN_DE_AUTH_LOGIN_AQUI
 @labId = 1
 @wsId = 1
 
 ### Crear workstation
 POST {{baseUrl}}/workstations/
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -15,12 +17,15 @@ Content-Type: application/json
 
 ### Listar workstations de un laboratorio (paginado)
 GET {{baseUrl}}/workstations/laboratorio/{{labId}}?pagina=1&tamano_pagina=10
+Authorization: Bearer {{token}}
 
 ### Obtener workstation
 GET {{baseUrl}}/workstations/{{wsId}}
+Authorization: Bearer {{token}}
 
 ### Actualizar workstation
 PUT {{baseUrl}}/workstations/{{wsId}}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -30,3 +35,4 @@ Content-Type: application/json
 
 ### Eliminar workstation
 DELETE {{baseUrl}}/workstations/{{wsId}}
+Authorization: Bearer {{token}}
